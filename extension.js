@@ -85,16 +85,19 @@ var main = function() {
           var title = song.song;
           var artist = song.artist;
           var id = song.id;
+          var timestamp = song.ts
           var key = song.key;
           var hasDownloadButton = jQuery(track).data("hasDownloadButton");
           if (typeof(hasDownloadButton) === 'undefined' || !hasDownloadButton){
             jQuery.getJSON("/serve/source/"+ id + "/" + key, function(data) {
               var download_url = data.url;
               var download_button = document.createElement("a");
-              download_button.target = "_top";
-              download_button.href = download_url;
+              var j = JSON.stringify({"artist":artist, "title":title, "timestamp":timestamp, "url":download_url});
+              var j_data = 'data:text/plain;charset=utf-8,' + j;
+              download_button.href = j_data;              
+              download_button.target = "_blank";
               download_button.className = "DownloadSongButton";
-              download_button.download = artist + ' - ' + title + '.mp3';
+              download_button.download = artist + '-' + title + '.hypemeta';
               download_button.innerHTML = '<table class="arrow"><tr><td rowspan="2"><input type="checkbox" /></td><td><div class="rect-arrow"></div></td></tr><tr><td class="'+triArrowString+     '"></td></tr></table>';
               jQuery(track).prepend('<li class="dl"><table class="spacer"></table>' + jQuery(download_button)[0].outerHTML + '</li>');
             });
@@ -114,11 +117,11 @@ var main = function() {
         (function (btn) {
           setTimeout(function() {
 	        var a = document.createElement('a');
-	        a.download = '';
-	        a.href = btn;
+	        a.download = btn.prop('download');
+	        a.href = btn.prop('href');
 	        a.dispatchEvent(new MouseEvent('click'));
           }, 10);
-        })(jQuery(this).prop('href'));
+        })(jQuery(this));
       }
     });
   });
@@ -145,16 +148,36 @@ var main = function() {
   
 };
 
-// Lets create the script objects
-var injectedScript = document.createElement('script');
-injectedScript.type = 'text/javascript';
-injectedScript.text = '('+main+')("");';
-(document.body || document.head).appendChild(injectedScript);
 
-//Lets create the CSS object. This has to be done this way rather than the manifest.json
-//because we want to override some of the CSS properties so they must be injected after.
-var injectedCSS = document.createElement('link');
-injectedCSS.type = 'text/css';
-injectedCSS.rel = 'stylesheet';
-injectedCSS.href = stylesheetUrl;
-(document.body || document.head).appendChild(injectedCSS);
+function setup(evt){
+  // Lets create the script objects
+  var injectedScript = document.createElement('script');
+  injectedScript.type = 'text/javascript';
+  injectedScript.text = '('+main+')("");';
+  (document.body || document.head).appendChild(injectedScript);
+
+  //Lets create the CSS object. This has to be done this way rather than the manifest.json
+  //because we want to override some of the CSS properties so they must be injected after.
+  var injectedCSS = document.createElement('link');
+  injectedCSS.type = 'text/css';
+  injectedCSS.rel = 'stylesheet';
+  injectedCSS.href = stylesheetUrl;
+  (document.body || document.head).appendChild(injectedCSS);
+}
+
+
+if(window.attachEvent) {
+    window.attachEvent('onload', setup);
+} else {
+    if(window.onload) {
+        var curronload = window.onload;
+        var newonload = function(evt) {
+            curronload(evt);
+            setup(evt);
+        };
+        window.onload = newonload;
+    } else {
+        window.onload = setup;
+    }
+}
+
