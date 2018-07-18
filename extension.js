@@ -110,7 +110,10 @@ var main = function() {
   };//buttonscript
   
   // Add a master link to download all songs on the page at once
-  jQuery("#submenu").append('<li id="DownloadAllSection">Select <span id="DownloadSelectAll">All</span>/<span id="DownloadSelectNone">None</span> &middot; <span id="DownloadAllSongsButton">Download</span></li>');
+  console.log("here")
+  jQuery("#submenu").prepend('<li id="DownloadAll"><a id="DownloadAllSongsButton">Download All</a></li>');
+  jQuery("#submenu").prepend('<li id="SelectAll"><a id="DownloadSelectAll">Select All</a></li>');
+  console.log("Submenu Added poop")
   jQuery("#DownloadAllSongsButton").click(function() {
     jQuery(".DownloadSongButton").each(function() {
       if (jQuery(this).find("input[type='checkbox']:checked").length) {
